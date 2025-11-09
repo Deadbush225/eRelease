@@ -1,3 +1,30 @@
+## Installation
+
+> Just clone the repo into a sub-folder
+
+```
+git clone https://github.com/Deadbush225/eRelease.git
+```
+
+## Recommended Project Structure
+
+```
+project/
+├── scripts/
+│   └── eRelease/
+│       ├── eRelease.ps1
+│       └── ...
+└── manifest.json
+
+or
+
+project/
+├── eRelease/
+│   ├── eRelease.ps1
+│   └── ...
+└── manifest.json
+```
+
 ## Usage
 
 > Run eRelease on the root project
