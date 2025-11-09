@@ -1,31 +1,33 @@
 # run from project root
 
 Write-Host "Current Directory: $(Get-Location)"
-# read file contents release-notes.md
-$releaseNotesPath = "./scripts/release-note.md"
+# read file contents release-template.md
+$releaseNotesPath = "./scripts/release-template.md"
 if (-not (Test-Path $releaseNotesPath)) {
     Write-Error "Release notes file not found: $releaseNotesPath"
     exit
 }
 
-# read package.json
-$packageJsonPath = "./package.json"
-if (-not (Test-Path $packageJsonPath)) {
-    Write-Error "Package.json file not found: $packageJsonPath"
+# read
+
+# read manifest.json
+$manifestPath = "./manifest.json"
+if (-not (Test-Path $manifestPath)) {
+    Write-Error "manifest.json file not found: $manifestPath"
     exit
 }
-$packageJson = Get-Content $packageJsonPath | ConvertFrom-Json
-$version = $packageJson.version
+$manifest = Get-Content $manifestPath | ConvertFrom-Json
+$version = $manifest.VERSION
 
 $releaseNotes = Get-Content $releaseNotesPath -Raw
 
 $variableMap = @{
-    "APPNAME" = "Tracie";
-    "VERSION" = $version;
-    "DATE"    = (Get-Date).ToString("yyyy-MM-dd");
-    "TAG"     = "v$version";
-    "REPO"    = "Deadbush225/Tracie";
-    "DEMO"    = "https://tracie-viz.vercel.app/";
+    "APPNAME"  = $manifest.APPNAME;
+    "VERSION"  = $version;
+    "DATE"     = (Get-Date).ToString("yyyy-MM-dd");
+    "TAG"      = "v$version";
+    "REPO"     = $manifest.REPO;
+    "DEMOLINK" = $manifest.DEMOLINK;
 }
 
 foreach ($key in $variableMap.Keys) {
@@ -58,7 +60,7 @@ if ($confirm.ToUpper() -notin @('Y', 'YES')) {
 $tempDir = Join-Path ([System.IO.Path]::GetTempPath()) ("tracie_release_{0}" -f ([guid]::NewGuid().ToString()))
 New-Item -Path $tempDir -ItemType Directory -Force | Out-Null
 
-$notesFile = Join-Path $tempDir 'release-notes.md'
+$notesFile = Join-Path $tempDir 'release-template.md'
 $releaseNotes | Out-File -FilePath $notesFile -Encoding UTF8
 
 Write-Host "Wrote release notes to: $notesFile"

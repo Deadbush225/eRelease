@@ -4,7 +4,7 @@
 **Release date:** ${DATE}
 
 **Full Changelog**: https://github.com/${REPO}/commits/${TAG}
-**Live Link:** ${DEMO}
+**Live Link:** ${DEMOLINK}
 
 ## Highlights
 
