@@ -1,6 +1,13 @@
+function BOLD {
+    param (
+        $string
+    )
+    return "`e[1m$string`e[0m"
+}
+
 function Write-ReleaseNotes {
     # read file contents release-template.md
-    $releaseNotesPath = "$PSScriptRoot/release-template.md"
+    $releaseNotesPath = Join-Path (Split-Path -Parent $PSScriptRoot) 'release-template.md'
     if (-not (Test-Path $releaseNotesPath)) {
         Write-Error "Release notes file not found: $releaseNotesPath"
         exit

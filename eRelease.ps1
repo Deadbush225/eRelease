@@ -1,13 +1,6 @@
 #!/usr/bin/env pwsh
 param([switch]$noInteractive = $false, [switch]$publish)
 
-function BOLD {
-    param (
-        $string
-    )
-    return "`e[1m$string`e[0m"
-}
-
 # run from the project root
 import-module "$PSScriptRoot/Write-ReleaseNotes.ps1"
 $notesFile, $variableMap = Write-ReleaseNotes

@@ -11,9 +11,10 @@ git clone https://github.com/Deadbush225/eRelease.git
 ```
 project/
 ├── scripts/
-│   └── eRelease/
-│       ├── eRelease.ps1
-│       └── ...
+│   ├── eRelease/
+│   │   ├── eRelease.ps1
+│   │   └── ...
+│   └── release-template.md
 └── manifest.json
 ```
 
