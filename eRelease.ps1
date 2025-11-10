@@ -1,3 +1,5 @@
+param([switch]$noInteractive = $false)
+
 function BOLD {
     param (
         $string
@@ -54,13 +56,15 @@ if ([string]::IsNullOrWhiteSpace($existingTag)) {
 }
 
 # confirm
-$confirm = Read-Host (BOLD "Create GitHub release $($variableMap['TAG']) in repo $($variableMap['REPO'])? (Y/n)")
-if ([string]::IsNullOrWhiteSpace($confirm)) {
-    $confirm = 'Y';
-}
-if ($confirm.ToUpper() -notin @('Y', 'YES')) {
-    Write-Warning "Release cancelled by user."
-    exit
+if (-not $noInteractive) {
+    $confirm = Read-Host (BOLD "Create GitHub release $($variableMap['TAG']) in repo $($variableMap['REPO'])? (Y/n)")
+    if ([string]::IsNullOrWhiteSpace($confirm)) {
+        $confirm = 'Y';
+    }
+    if ($confirm.ToUpper() -notin @('Y', 'YES')) {
+        Write-Warning "Release cancelled by user."
+        exit
+    }
 }
 
 # prepare temp dir and write notes

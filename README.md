@@ -15,14 +15,6 @@ project/
 │       ├── eRelease.ps1
 │       └── ...
 └── manifest.json
-
-or
-
-project/
-├── eRelease/
-│   ├── eRelease.ps1
-│   └── ...
-└── manifest.json
 ```
 
 ## Usage
@@ -33,14 +25,29 @@ project/
 2. Edit `release-template.md` file that will contain the body of the commit.
 3. Run `eRelease.ps1` on the root of the project
 
-## Config for Manifest.json
+(Optional) 4. Add `workflow/create-release.yml` to your github workflow
+
+## Required Config for Manifest.json
+
+| Key     | Value |
+| ------- | ----- |
+| VERSION | 1.0.0 |
+
+## Auto Variables
+
+| Key | Value         |
+| --- | ------------- |
+| TAG | "v${VERSION}" |
+
+> Custom Variables are also Supported
+
+## Custom Variables
 
 | Key      | Value                          |
 | -------- | ------------------------------ |
 | APPNAME  | Tracie                         |
 | REPO     | Deadbush225/Tracie             |
 | DEMOLINK | https://tracie-viz.vercel.app/ |
-| VERSION  | 1.0.0                          |
 
 ## Example
 
