@@ -18,31 +18,34 @@ project/
 └── manifest.json
 ```
 
-## Usage
+- `manifest.json` - contains the dynamic variables used in `release-template.md`
 
-> Run eRelease on the root project
+### Setup
 
 1. Create a `manifest.json` file in the root to configure the publisher settings.
 2. Edit `release-template.md` file that will contain the body of the commit.
-3. Run `eRelease.ps1` on the root of the project
+3. (Optional) Add `workflow/create-release.yml` to your github workflow
 
-(Optional) 4. Add `workflow/create-release.yml` to your github workflow
+### Creating release
 
-## Required Config for Manifest.json
+1. Edit version in `manifest.json` or run `bump_version.ps1 -[minor|major|*patch]`
+2. Run `eRelease.ps1` on the root of the project
+
+### Required Config for Manifest.json
 
 | Key     | Value |
 | ------- | ----- |
 | VERSION | 1.0.0 |
 
-## Auto Variables
+### Automatic Variables
 
 | Key | Value         |
 | --- | ------------- |
 | TAG | "v${VERSION}" |
 
-> Custom Variables are also Supported
+### User Custom Variables
 
-## Custom Variables
+> Custom Variables are also Supported
 
 | Key      | Value                          |
 | -------- | ------------------------------ |
@@ -50,7 +53,7 @@ project/
 | REPO     | Deadbush225/Tracie             |
 | DEMOLINK | https://tracie-viz.vercel.app/ |
 
-## Example
+### Example
 
 ```md
 # ${APPNAME} — Release Notes
