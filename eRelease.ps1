@@ -3,7 +3,7 @@ param([switch]$noInteractive = $false, [switch]$publish)
 
 # run from the project root
 import-module "$PSScriptRoot/Write-ReleaseNotes.ps1"
-$notesFile, $variableMap = Write-ReleaseNotes
+$notesFile, $variableMap, $tempDir = Write-ReleaseNotes
 
 #check if a git tag already exists
 $existingTag = git tag --list $variableMap['TAG']

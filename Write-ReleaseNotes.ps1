@@ -53,5 +53,5 @@ function Write-ReleaseNotes {
     # Use ANSI bold (terminal must support ANSI)
     Write-Host (BOLD "Release Notes:")
     Write-Host $releaseNotes -ForegroundColor DarkCyan
-    return $notesFile, $variableMap
+    return $notesFile, $variableMap, $tempDir
 }
