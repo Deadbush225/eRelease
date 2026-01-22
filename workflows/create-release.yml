@@ -4,25 +4,64 @@ on:
   push:
     tags:
       - "v*"
+  # Enable manual triggering in gh CLI or GitHub UI
+  workflow_dispatch:
+    inputs:
+      version_tag:
+        description: 'Tag/Version for the release (e.g., v1.0.1)'
+        required: true
 
 jobs:
   create-release:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          submodules: "recursive"
+          fetch-depth: 0
 
-      - name: Setup GitHub CLI
-        uses: cli/gh-action@v2
+      # Determine which tag to use (Automatic vs Manual input)
+      - name: Set Tag Variable
+        id: vars
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "TAG_NAME=${{ inputs.version_tag }}" >> $GITHUB_OUTPUT
+          else
+            echo "TAG_NAME=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+          fi
 
-      - name: Authenticate gh CLI
+      - name: Remove existing release if it exists
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh auth login --with-token
+        run: |
+          # Use the variable from the previous step
+          gh release delete ${{ steps.vars.outputs.TAG_NAME }} --yes || echo "No existing release found."
 
-      - name: Setup PowerShell
-        uses: actions/setup-powershell@v2
+      - name: List workspace
+        shell: pwsh
+        run: |
+          Write-Host "GITHUB_WORKSPACE: $env:GITHUB_WORKSPACE"
+          Get-ChildItem -Path $env:GITHUB_WORKSPACE -Force -Recurse | ForEach-Object { Write-Host $_.FullName }
 
-      - name: Run eRelease.ps1 (non-interactive)
-        # Override Read-Host to auto-confirm, then dot-source the script from workspace
-        run: . '${{ github.workspace }}/scripts/eRelease/eRelease.ps1' -noInteractive
+      - name: Generate release notes
+        id: gen_notes
+        shell: pwsh
+        run: |
+          . "${{ github.workspace }}/scripts/eRelease/Write-ReleaseNotes.ps1"
+          $notesFile, $variableMap, $notesDir = Write-ReleaseNotes
+          Write-Host "Wrote release notes to: $notesFile"
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "notes_file=$notesFile"
+
+      - name: Create GitHub Release (CLI)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create ${{ steps.vars.outputs.TAG_NAME }} \
+            --title "${{ steps.vars.outputs.TAG_NAME }}" \
+            --notes-file "${{ steps.gen_notes.outputs.notes_file }}" \
+            --draft=false \
+            --prerelease=false
