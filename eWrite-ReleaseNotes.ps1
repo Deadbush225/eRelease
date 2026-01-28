@@ -10,7 +10,7 @@ function Write-ReleaseNotes {
     $releaseNotesPath = Join-Path $PSScriptRoot 'release-template.md'
     if (-not (Test-Path $releaseNotesPath)) {
         Write-Error "Release notes file not found: $releaseNotesPath"
-        return 1
+        return
     }
 
     # read
@@ -19,7 +19,7 @@ function Write-ReleaseNotes {
     $manifestPath = "./manifest.json"
     if (-not (Test-Path $manifestPath)) {
         Write-Error "manifest.json file not found: $manifestPath"
-        return 1
+        return
     }
     $manifest = Get-Content $manifestPath | ConvertFrom-Json
     $version = $manifest.VERSION
