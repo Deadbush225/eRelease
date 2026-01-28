@@ -53,7 +53,7 @@ function Write-ReleaseNotes {
             foreach ($file in $assets) {
                 $hash = Get-FileHash -Path $file.FullName -Algorithm SHA256
                 $name = $file.Name
-                $sha = "`$($hash.Hash)`"
+                $sha = "``$($hash.Hash)``"
                 $downloadLink = "$($variableMap['REPO'])/releases/download/$($variableMap['TAG'])/$name"
                 $hashTableMd += "| [$name]($downloadLink) | $sha |"
 
@@ -84,3 +84,5 @@ function Write-ReleaseNotes {
     Write-Host $releaseNotes -ForegroundColor DarkCyan
     return $notesFile, $variableMap, $tempDir
 }
+
+Write-ReleaseNotes
