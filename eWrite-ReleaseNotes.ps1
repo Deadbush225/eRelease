@@ -7,10 +7,10 @@ function BOLD {
 
 function Write-ReleaseNotes {
     # read file contents release-template.md
-    $releaseNotesPath = Join-Path (Split-Path -Parent $PSScriptRoot) 'release-template.md'
+    $releaseNotesPath = Join-Path $PSScriptRoot 'release-template.md'
     if (-not (Test-Path $releaseNotesPath)) {
         Write-Error "Release notes file not found: $releaseNotesPath"
-        exit
+        return 1
     }
 
     # read
@@ -19,7 +19,7 @@ function Write-ReleaseNotes {
     $manifestPath = "./manifest.json"
     if (-not (Test-Path $manifestPath)) {
         Write-Error "manifest.json file not found: $manifestPath"
-        exit
+        return 1
     }
     $manifest = Get-Content $manifestPath | ConvertFrom-Json
     $version = $manifest.VERSION
@@ -39,6 +39,30 @@ function Write-ReleaseNotes {
         $pattern = [regex]::Escape('${' + $key + '}')
         $replacement = $variableMap[$key]
         $releaseNotes = [regex]::Replace($releaseNotes, $pattern, [System.Text.RegularExpressions.MatchEvaluator] { param($m) $replacement })
+    }
+
+    # Check for release-assets to generate SHA table
+    $assetsPath = "release-assets"
+    $hashTableMd = ""
+    if (Test-Path $assetsPath) {
+        $assets = Get-ChildItem -Path $assetsPath -File
+        if ($assets.Count -gt 0) {
+            $hashTableMd += "`n### File Checksums`n"
+            $hashTableMd += "| File | SHA256 |`n"
+            $hashTableMd += "| :--- | :--- |`n"
+            foreach ($file in $assets) {
+                $hash = Get-FileHash -Path $file.FullName -Algorithm SHA256
+                $name = $file.Name
+                $sha = $hash.Hash
+                $hashTableMd += "| $name | $sha |`n"
+            }
+        }
+    }
+    
+    if ($releaseNotes -match '@HASH_TABLE@') {
+        $releaseNotes = $releaseNotes -replace '@HASH_TABLE@', $hashTableMd
+    } else {
+        $releaseNotes += "`n$hashTableMd"
     }
 
     # prepare temp dir and write notes

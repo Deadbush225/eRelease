@@ -1,9 +1,9 @@
 ## Installation
 
-> Just clone the repo into a sub-folder
+> Just add the repo as a submodule
 
 ```
-git clone https://github.com/Deadbush225/eRelease.git
+git submodule add https://github.com/Deadbush225/eRelease.git scripts/eRelease
 ```
 
 ## Recommended Project Structure
@@ -23,13 +23,18 @@ project/
 ### Setup
 
 1. Create a `manifest.json` file in the root to configure the publisher settings.
-2. Edit `release-template.md` file that will contain the body of the commit.
-3. (Optional) Add `workflow/create-release.yml` to your github workflow
+2. Create/edit `release-template.md` file that will contain the body of the commit.
+
+> (Optional) Add `workflow/create-release.yml` to your github workflow
 
 ### Creating release
 
 1. Edit version in `manifest.json` or run `bump_version.ps1 -[minor|major|*patch]`
 2. Run `eRelease.ps1` on the root of the project
+
+### eRelease.ps1 Mechanism
+
+1. Checks for `release-assets` folder, if not empty adds it to the release and write a hash table for it.
 
 ### Required Config for Manifest.json
 
@@ -64,3 +69,8 @@ project/
 **Full Changelog**: https://github.com/${REPO}/commits/${TAG}
 **Live Link:** ${DEMOLINK}
 ```
+
+### Template only Variables
+
+| Key | Value         |
+| @HASH_TABLE@ | Where hash table will be inserted |
