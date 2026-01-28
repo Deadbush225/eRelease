@@ -13,8 +13,8 @@ project/
 ├── scripts/
 │   ├── eRelease/
 │   │   ├── eRelease.ps1
+│   │   ├── release-template.md    # create this one
 │   │   └── ...
-│   └── release-template.md
 └── manifest.json
 ```
 
