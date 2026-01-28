@@ -25,6 +25,9 @@ project/
 1. Create a `manifest.json` file in the root to configure the publisher settings.
 2. Create/edit `release-template.md` file that will contain the body of the commit.
 
+> (Required)
+github cli (gh), make sure you have authenticated first
+
 > (Optional) Add `workflow/create-release.yml` to your github workflow
 
 ### Creating release
