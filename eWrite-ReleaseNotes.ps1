@@ -47,20 +47,25 @@ function Write-ReleaseNotes {
     if (Test-Path $assetsPath) {
         $assets = Get-ChildItem -Path $assetsPath -File
         if ($assets.Count -gt 0) {
-            $hashTableMd += "`n### File Checksums`n"
+            $hashTableMd += "### File Checksums`n"
             $hashTableMd += "| File | SHA256 |`n"
             $hashTableMd += "| :--- | :--- |`n"
             foreach ($file in $assets) {
                 $hash = Get-FileHash -Path $file.FullName -Algorithm SHA256
                 $name = $file.Name
-                $sha = $hash.Hash
-                $hashTableMd += "| $name | $sha |`n"
+                $sha = "``$hash.Hash``"
+                $downloadLink = "$($variableMap['REPO'])/releases/download/$($variableMap['TAG'])/$name"
+                $hashTableMd += "| [$name]($downloadLink) | $sha |"
+
+                if ($file -ne $assets[-1]) {
+                    $hashTableMd += "`n"
+                }
             }
         }
     }
     
-    if ($releaseNotes -match '@HASH_TABLE@') {
-        $releaseNotes = $releaseNotes -replace '@HASH_TABLE@', $hashTableMd
+    if ($releaseNotes -match '@ASSETS_TABLE@') {
+        $releaseNotes = $releaseNotes -replace '@ASSETS_TABLE@', $hashTableMd
     } else {
         $releaseNotes += "`n$hashTableMd"
     }

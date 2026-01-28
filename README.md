@@ -47,6 +47,7 @@ project/
 | Key | Value         |
 | --- | ------------- |
 | TAG | "v${VERSION}" |
+| DATE | Current date |
 
 ### User Custom Variables
 
@@ -73,4 +74,4 @@ project/
 ### Template only Variables
 
 | Key | Value         |
-| @HASH_TABLE@ | Where hash table will be inserted |
+| @ASSETS_TABLE@ | Where hash table will be inserted |
