@@ -24,6 +24,26 @@ function Write-ReleaseNotes {
     $manifest = Get-Content $manifestPath | ConvertFrom-Json
     $version = $manifest.VERSION
 
+    # Determine previous tag for changelog
+    $currentTag = "v$version"
+    $tags = @(git tag --sort=-creatordate)
+    $previousTag = $null
+
+    if ($tags -contains $currentTag) {
+        $idx = $tags.IndexOf($currentTag)
+        if ($idx + 1 -lt $tags.Count) {
+            $previousTag = $tags[$idx + 1]
+        }
+    } elseif ($tags.Count -gt 0) {
+        $previousTag = $tags[0]
+    }
+
+    $changeLogUrl = ""
+    if ($previousTag -and $manifest.REPO) {
+        $repoUrl = $manifest.REPO.TrimEnd('/')
+        $changeLogUrl = "$repoUrl/compare/$previousTag...$currentTag"
+    }
+
     $releaseNotes = Get-Content $releaseNotesPath -Raw
 
     # add standard and automatic variables to map
@@ -32,6 +52,7 @@ function Write-ReleaseNotes {
         "VERSION"  = $manifest.VERSION;
         "DATE"     = (Get-Date).ToString("yyyy-MM-dd");
         "TAG"      = "v$version";
+        "CHANGE_LOG_URL" = $changeLogUrl
     }
 
     # add custom manifest variables to map
