@@ -26,13 +26,17 @@ function Write-ReleaseNotes {
 
     $releaseNotes = Get-Content $releaseNotesPath -Raw
 
+    # add standard and automatic variables to map
     $variableMap = @{
         "APPNAME"  = $manifest.APPNAME;
-        "VERSION"  = $version;
+        "VERSION"  = $manifest.VERSION;
         "DATE"     = (Get-Date).ToString("yyyy-MM-dd");
         "TAG"      = "v$version";
-        "REPO"     = $manifest.REPO;
-        "DEMOLINK" = $manifest.DEMOLINK;
+    }
+
+    # add custom manifest variables to map
+    foreach ($property in $manifest.PSObject.Properties) {
+        $variableMap[$property.Name] = $property.Value
     }
 
     foreach ($key in $variableMap.Keys) {
@@ -48,14 +52,15 @@ function Write-ReleaseNotes {
         $assets = Get-ChildItem -Path $assetsPath -File
         if ($assets.Count -gt 0) {
             $hashTableMd += "### File Checksums`n"
-            $hashTableMd += "| File | SHA256 |`n"
-            $hashTableMd += "| :--- | :--- |`n"
+            $hashTableMd += "| Download Link | Installer Size | SHA256 |`n"
+            $hashTableMd += "| :--- | :--- | :--- |`n"
             foreach ($file in $assets) {
                 $hash = Get-FileHash -Path $file.FullName -Algorithm SHA256
                 $name = $file.Name
+                $fileSize = [Math]::Round($file.Length / 1MB, 2)
                 $sha = "``$($hash.Hash)``"
                 $downloadLink = "$($variableMap['REPO'])/releases/download/$($variableMap['TAG'])/$name"
-                $hashTableMd += "| [$name]($downloadLink) | $sha |"
+                $hashTableMd += "| [$name]($downloadLink) | $fileSize MB | $sha |"
 
                 if ($file -ne $assets[-1]) {
                     $hashTableMd += "`n"
