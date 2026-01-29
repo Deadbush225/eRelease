@@ -40,7 +40,7 @@ function Write-ReleaseNotes {
     $changeLogUrl = ""
     if ($previousTag -and $manifest.REPO) {
         $repoUrl = $manifest.REPO.TrimEnd('/')
-        $changeLogUrl = "$repoUrl/compare/$previousTag...$currentTag"
+        $changeLogUrl = "**Full Changelog**: $repoUrl/compare/$previousTag...$currentTag"
     }
 
     $releaseNotes = Get-Content $releaseNotesPath -Raw
@@ -51,7 +51,6 @@ function Write-ReleaseNotes {
         "VERSION"  = $manifest.VERSION;
         "DATE"     = (Get-Date).ToString("yyyy-MM-dd");
         "TAG"      = "v$version";
-        "CHANGE_LOG_URL" = $changeLogUrl;
     }
 
     # add custom manifest variables to map
@@ -141,6 +140,10 @@ function Write-ReleaseNotes {
         $releaseNotes = $releaseNotes -replace '@ASSETS_TABLE@', $hashTableMd
     } else {
         $releaseNotes += "`n$hashTableMd"
+    }
+
+    if ($releaseNotes -match '@CHANGE_LOG_URL@') {
+        $releaseNotes = $releaseNotes -replace '@CHANGE_LOG_URL@', $changeLogUrl
     }
 
     # prepare temp dir and write notes

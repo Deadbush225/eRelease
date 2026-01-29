@@ -49,12 +49,13 @@ github cli (gh), make sure you have authenticated first
 
 ### Automatic Variables
 
-| Key | Value         |
-| --- | ------------- |
-| TAG | "v${VERSION}" |
-| DATE | Current date |
-| @ASSETS_TABLE@ | Where hash table will be inserted |
-| CHANGE_LOG_URL | Change log link |
+| Key | Value | Deps | Description |
+| --- | ----- | ---- | ----------- |
+| `TAG` | `v${VERSION}` | `VERSION` | Generated release tag (prefix `v`) |
+| `DATE` | Current date | — | Release date (ISO 8601 or project locale) |
+| `@ASSETS_TABLE@` | Generated Markdown table of asset names, sizes and hashes | `ASSETS_*` (`ASSETS_PATHS`, `ASSETS_EXTENSIONS`, `ASSETS_IGNORE_REGEX`) | Inserted into the release body when assets are present |
+| `@CHANGE_LOG_URL@` | URL to full changelog | `REPO` | Link to changelog; requires a valid previous tag in the repository |
+
 
 ### Optional Variables
 
