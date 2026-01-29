@@ -3,8 +3,10 @@
 **Version:** ${TAG}
 **Release date:** ${DATE}
 
-**Full Changelog**: https://github.com/${REPO}/commits/${TAG}
+**Full Changelog**: ${CHANGE_LOG_URL}
 **Live Link:** ${DEMOLINK}
+
+@ASSETS_TABLE@
 
 ## Highlights
 

@@ -51,6 +51,14 @@ github cli (gh), make sure you have authenticated first
 | --- | ------------- |
 | TAG | "v${VERSION}" |
 | DATE | Current date |
+| @ASSETS_TABLE@ | Where hash table will be inserted |
+| CHANGE_LOG_URL | Change log link |
+
+### Optional Variables
+
+| Key | Value |
+| --- | ----- |
+| ASSETS_PATHS | Array of assets folders |
 
 ### User Custom Variables
 
@@ -70,11 +78,21 @@ github cli (gh), make sure you have authenticated first
 **Version:** ${TAG}
 **Release date:** ${DATE}
 
-**Full Changelog**: https://github.com/${REPO}/commits/${TAG}
+**Full Changelog**: ${CHANGE_LOG_URL}
 **Live Link:** ${DEMOLINK}
 ```
 
-### Template only Variables
+```json
+{
+	"APPNAME": "eprint",
+	"VERSION": "1.6.3",
+	"DESCRIPTION": "A mobile application for scanning, printing, and managing documents on the go.",
+	"ASSETS_PATHS": ["./build/app/outputs/flutter-apk"],
+	"ASSETS_EXTENSIONS": [".apk"],
+	"ASSETS_IGNORE_REGEX": ["unaligned", "debug", "mapping"]
+}
+```
 
-| Key | Value         |
-| @ASSETS_TABLE@ | Where hash table will be inserted |
+### Process Flow
+
+manifest.json -> eWrite-ReleaseNotes.ps1 -> eRelease.ps1

@@ -1,3 +1,4 @@
+
 function BOLD {
     param (
         $string
@@ -12,8 +13,6 @@ function Write-ReleaseNotes {
         Write-Error "Release notes file not found: $releaseNotesPath"
         return
     }
-
-    # read
 
     # read manifest.json
     $manifestPath = "./manifest.json"
@@ -52,7 +51,7 @@ function Write-ReleaseNotes {
         "VERSION"  = $manifest.VERSION;
         "DATE"     = (Get-Date).ToString("yyyy-MM-dd");
         "TAG"      = "v$version";
-        "CHANGE_LOG_URL" = $changeLogUrl
+        "CHANGE_LOG_URL" = $changeLogUrl;
     }
 
     # add custom manifest variables to map
@@ -66,26 +65,74 @@ function Write-ReleaseNotes {
         $releaseNotes = [regex]::Replace($releaseNotes, $pattern, [System.Text.RegularExpressions.MatchEvaluator] { param($m) $replacement })
     }
 
-    # Check for release-assets to generate SHA table
-    $assetsPath = "release-assets"
-    $hashTableMd = ""
-    if (Test-Path $assetsPath) {
-        $assets = Get-ChildItem -Path $assetsPath -File
-        if ($assets.Count -gt 0) {
-            $hashTableMd += "### File Checksums`n"
-            $hashTableMd += "| Download Link | Installer Size | SHA256 |`n"
-            $hashTableMd += "| :--- | :--- | :--- |`n"
-            foreach ($file in $assets) {
-                $hash = Get-FileHash -Path $file.FullName -Algorithm SHA256
-                $name = $file.Name
-                $fileSize = [Math]::Round($file.Length / 1MB, 2)
-                $sha = "``$($hash.Hash)``"
-                $downloadLink = "$($variableMap['REPO'])/releases/download/$($variableMap['TAG'])/$name"
-                $hashTableMd += "| [$name]($downloadLink) | $fileSize MB | $sha |"
+    # ------------------------------------------------------------ #
 
-                if ($file -ne $assets[-1]) {
-                    $hashTableMd += "`n"
+    # Get assets from manifest
+    $assetPaths = $variableMap['ASSETS_PATHS']
+    if ($null -eq $assetPaths -or $assetPaths.Count -eq 0) {
+        Write-Warning "No ASSETS array provided in manifest.json. Falling back to default 'release-assets'."
+        $assetPaths = @("release-assets")
+    }
+    $assetExts = $variableMap['ASSETS_EXTENSIONS']
+    $assetIgnoreRegex = $variableMap['ASSETS_IGNORE_REGEX']
+
+    # Check for release-assets to generate SHA table
+    $hashTableMd = ""
+    $allAssets = @()
+
+    foreach ($path in $assetPaths) {
+        if (Test-Path $path) {
+            $item = Get-Item $path
+            if ($item.PSIsContainer) {
+                # Add directory files, optionally filtered by extension
+                $files = Get-ChildItem -Path $path -File
+                if ($null -ne $assetExts -and $assetExts.Count -gt 0) {
+                     $files = $files | Where-Object { $assetExts -contains $_.Extension }
                 }
+                
+                # Filter by ignore regex
+                if ($null -ne $assetIgnoreRegex -and $assetIgnoreRegex.Count -gt 0) {
+                     foreach ($regex in $assetIgnoreRegex) {
+                        $files = $files | Where-Object { $_.Name -notmatch $regex }
+                     }
+                }
+
+                $allAssets += $files
+            } else {
+                # Add single file, checking extension if filter exists
+                if ($null -eq $assetExts -or $assetExts.Count -eq 0 -or ($assetExts -contains $item.Extension)) {
+                    # Check regex ignore for single file
+                    $shouldAdd = $true
+                    if ($null -ne $assetIgnoreRegex -and $assetIgnoreRegex.Count -gt 0) {
+                        foreach ($regex in $assetIgnoreRegex) {
+                           if ($item.Name -match $regex) {
+                               $shouldAdd = $false
+                           }
+                        }
+                    } 
+                    
+                    if ($shouldAdd) {
+                        $allAssets += $item
+                    }
+                }
+            }
+        }
+    }
+
+    if ($allAssets.Count -gt 0) {
+        $hashTableMd += "### File Checksums`n"
+        $hashTableMd += "| Download Link | Installer Size | SHA256 |`n"
+        $hashTableMd += "| :--- | :--- | :--- |`n"
+        foreach ($file in $allAssets) {
+            $hash = Get-FileHash -Path $file.FullName -Algorithm SHA256
+            $name = $file.Name
+            $fileSize = [Math]::Round($file.Length / 1MB, 2)
+            $sha = "``$($hash.Hash)``"
+            $downloadLink = "$($variableMap['REPO'])/releases/download/$($variableMap['TAG'])/$name"
+            $hashTableMd += "| [$name]($downloadLink) | $fileSize MB | $sha |"
+
+            if ($file -ne $allAssets[-1]) {
+                $hashTableMd += "`n"
             }
         }
     }
@@ -108,7 +155,7 @@ function Write-ReleaseNotes {
     # Use ANSI bold (terminal must support ANSI)
     Write-Host (BOLD "Release Notes:")
     Write-Host $releaseNotes -ForegroundColor DarkCyan
-    return $notesFile, $variableMap, $tempDir
+    return $notesFile, $variableMap, $tempDir, $allAssets
 }
 
 Write-ReleaseNotes

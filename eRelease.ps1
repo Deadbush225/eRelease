@@ -1,6 +1,6 @@
 #!/usr/bin/env pwsh
 param(
-    [switch]$noInteractive = $false 
+    [switch]$noInteractive = $false
 )
 
 $scriptPath = $PSScriptRoot
@@ -29,7 +29,7 @@ Push-Location $root
 try {
     # run from the project root
     import-module "$scriptPath/eWrite-ReleaseNotes.ps1" -Force
-    $notesFile, $variableMap, $tempDir = Write-ReleaseNotes
+    $notesFile, $variableMap, $tempDir, $allAssets = Write-ReleaseNotes
 
     #check if a git tag already exists
     $existingTag = git tag --list $variableMap['TAG']
@@ -56,12 +56,8 @@ try {
     $version = $variableMap['VERSION']
     $title = "$($variableMap['APPNAME']) $version"
 
-    # Check for release-assets to upload
-    $assetsList = @()
-    $assetsPath = "release-assets"
-    if (Test-Path $assetsPath) {
-        $assetsList = @(Get-ChildItem -Path $assetsPath -File | ForEach-Object { $_.FullName })
-    }
+    # Collect assets to upload
+    $assetsList = $allAssets | ForEach-Object { $_.FullName }
 
     try {
         if ($assetsList.Count -gt 0) {
