@@ -46,6 +46,7 @@ github cli (gh), make sure you have authenticated first
 | Key     | Value |
 | ------- | ----- |
 | VERSION | 1.0.0 |
+| REPO     | https://github.com/Deadbush225/Poltergeist |
 
 ### Automatic Variables
 
@@ -70,7 +71,6 @@ github cli (gh), make sure you have authenticated first
 | Key      | Value                          |
 | -------- | ------------------------------ |
 | APPNAME  | Tracie                         |
-| REPO     | Deadbush225/Tracie             |
 | DEMOLINK | https://tracie-viz.vercel.app/ |
 
 ### Example
