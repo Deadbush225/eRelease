@@ -73,8 +73,7 @@ try {
   [int]$minor_i = [int]$Matches[2]
   [int]$patch_i = [int]$Matches[3]
 
-  Write-Host "Current version: $major_i.$minor_i.$patch_i"
-  Write-Host "$major $minor $patch"
+  Write-Host "Current manifest version: $major_i.$minor_i.$patch_i"
 
   if ($major) {
     $major_i += 1
@@ -88,18 +87,59 @@ try {
   }
 
   $newVersion = "$major_i.$minor_i.$patch_i"
+  Write-Host "Bumping target to: $newVersion"
 
-  # Backup original
-  # $backup = "$Path.bak.$((Get-Date).ToString('yyyyMMddHHmmss'))"
-  # Copy-Item -Path $Path -Destination $backup -Force
-
-  # Update and write JSON
+  # 1. Update manifest.json
   $json.version = $newVersion
-  # Pretty-print JSON with reasonable depth
   $txt = $json | ConvertTo-Json -Depth 20
   Set-Content -Path $Path -Value $txt -Encoding UTF8
+  Write-Host " -> Updated manifest.json"
 
-  Write-Output $newVersion
+  # 2. Dictionary of other versioned files and their Regex patterns
+  # (?m) enables multiline mode so ^ matches the start of a line
+  $filesToUpdate = @{
+      "package.json" = @{
+          # Matches: "version": "1.0.0" (keeps spacing intact)
+          Pattern = '(?m)(^\s*"version"\s*:\s*)"\d+\.\d+\.\d+[a-zA-Z0-9\.\-\+]*"'
+          Replacement = '${1}"' + $newVersion + '"'
+      }
+      "pubspec.yaml" = @{
+          # Matches: version: 1.0.0+1 (keeps spacing intact, handles build numbers)
+          Pattern = '(?m)(^version\s*:\s*)[''"]?\d+\.\d+\.\d+[a-zA-Z0-9\.\-\+]*[''"]?'
+          Replacement = '${1}' + $newVersion
+      }
+      "Cargo.toml" = @{
+          # Matches: version = "1.0.0" (For Rust, if needed)
+          Pattern = '(?m)(^version\s*=\s*)"\d+\.\d+\.\d+[a-zA-Z0-9\.\-\+]*"'
+          Replacement = '${1}"' + $newVersion + '"'
+      }
+      "pyproject.toml" = @{
+          # Matches: version = "1.0.0" (For Python, if needed)
+          Pattern = '(?m)(^version\s*=\s*)"\d+\.\d+\.\d+[a-zA-Z0-9\.\-\+]*"'
+          Replacement = '${1}"' + $newVersion + '"'
+      }
+  }
+
+  # 3. Iterate and apply changes to any matched files
+  foreach ($fileName in $filesToUpdate.Keys) {
+      $targetPath = Join-Path $root $fileName
+      if (Test-Path $targetPath) {
+          $config = $filesToUpdate[$fileName]
+          $content = Get-Content -Raw -Path $targetPath
+          
+          if ($content -match $config.Pattern) {
+              $newContent = [regex]::Replace($content, $config.Pattern, $config.Replacement)
+              Set-Content -Path $targetPath -Value $newContent -Encoding UTF8
+              Write-Host " -> Updated $fileName"
+          } else {
+              Write-Warning " -> Found $fileName, but could not locate a valid version string."
+          }
+      }
+  }
+
+  Write-Output ""
+  Write-Output "Successfully updated to $newVersion"
+
 } finally {
   Pop-Location
 }
