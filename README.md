@@ -1,6 +1,6 @@
 ## Installation
 
-> Just add the repo as a submodule
+> Just add this repo as a submodule
 
 ```
 git submodule add https://github.com/Deadbush225/eRelease.git scripts/eRelease
