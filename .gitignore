@@ -1,2 +1,3 @@
 # ignore project specific
 tmp/
+./release-template.md

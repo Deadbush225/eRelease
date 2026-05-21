@@ -15,6 +15,7 @@ project/
 │   │   ├── eRelease.ps1
 │   │   ├── release-template.md    # create this one
 │   │   └── ...
+│   ├── script for building assets
 └── manifest.json
 ```
 
